@@ -1,0 +1,39 @@
+<svg width="1280" height="760" viewBox="0 0 1280 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="760" fill="#F5F7FA"/>
+  <text x="72" y="78" fill="#16324F" font-family="Arial, sans-serif" font-size="36" font-weight="700">Idegis Modbus • Entity Overview</text>
+
+  <rect x="70" y="120" width="270" height="260" rx="22" fill="white" stroke="#D7DEE7" stroke-width="2"/>
+  <text x="102" y="170" fill="#0E4A7B" font-family="Arial, sans-serif" font-size="28" font-weight="700">Switches</text>
+  <text x="102" y="225" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Pool Pump</text>
+  <text x="102" y="265" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Relay Square</text>
+  <text x="102" y="305" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Relay Triangle</text>
+  <text x="102" y="345" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Pool Led Light</text>
+
+  <rect x="365" y="120" width="270" height="260" rx="22" fill="white" stroke="#D7DEE7" stroke-width="2"/>
+  <text x="397" y="170" fill="#0E4A7B" font-family="Arial, sans-serif" font-size="28" font-weight="700">Numbers</text>
+  <text x="397" y="225" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Target PH</text>
+  <text x="397" y="265" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Target ORP</text>
+  <text x="397" y="305" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Target Chlorine</text>
+  <text x="397" y="345" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Target Production</text>
+
+  <rect x="660" y="120" width="270" height="260" rx="22" fill="white" stroke="#D7DEE7" stroke-width="2"/>
+  <text x="692" y="170" fill="#0E4A7B" font-family="Arial, sans-serif" font-size="28" font-weight="700">Sensors</text>
+  <text x="692" y="225" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Temperature</text>
+  <text x="692" y="265" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• pH / ORP / Chlorine</text>
+  <text x="692" y="305" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Salt / Production</text>
+  <text x="692" y="345" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• UV Counters</text>
+
+  <rect x="955" y="120" width="270" height="260" rx="22" fill="white" stroke="#D7DEE7" stroke-width="2"/>
+  <text x="987" y="170" fill="#0E4A7B" font-family="Arial, sans-serif" font-size="28" font-weight="700">Binary Sensors</text>
+  <text x="987" y="225" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Flow Problem</text>
+  <text x="987" y="265" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Electrolysis ON</text>
+  <text x="987" y="305" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• Digital Inputs</text>
+  <text x="987" y="345" fill="#30465F" font-family="Arial, sans-serif" font-size="22">• UV Status</text>
+
+  <rect x="70" y="420" width="1155" height="250" rx="22" fill="white" stroke="#D7DEE7" stroke-width="2"/>
+  <text x="102" y="474" fill="#0E4A7B" font-family="Arial, sans-serif" font-size="30" font-weight="700">Operational Highlights</text>
+  <text x="102" y="530" fill="#30465F" font-family="Arial, sans-serif" font-size="24">• Local-only polling through the Modbus TCP bridge</text>
+  <text x="102" y="575" fill="#30465F" font-family="Arial, sans-serif" font-size="24">• Native Home Assistant config flow and options flow</text>
+  <text x="102" y="620" fill="#30465F" font-family="Arial, sans-serif" font-size="24">• Diagnostics support and maintenance buttons for documented reset actions</text>
+</svg>
+
