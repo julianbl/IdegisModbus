@@ -1,0 +1,4 @@
+force_refresh:
+  target:
+    entity:
+      integration: idegis_modbus

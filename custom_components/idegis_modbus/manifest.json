@@ -1,0 +1,15 @@
+{
+  "domain": "idegis_modbus",
+  "name": "Idegis Modbus",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/julianb/IdegisModbus",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/julianb/IdegisModbus/issues",
+  "loggers": ["pymodbus"],
+  "requirements": ["pymodbus>=3.6.9,<4.0.0"],
+  "version": "0.1.0"
+}
+

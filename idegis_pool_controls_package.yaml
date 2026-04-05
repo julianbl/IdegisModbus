@@ -1,0 +1,267 @@
+# Home Assistant package for editable Idegis setpoints over Modbus.
+#
+# Enable packages in configuration.yaml:
+# homeassistant:
+#   packages: !include_dir_named packages
+#
+# Then place this file inside your HA packages directory, for example:
+# /config/packages/idegis_pool_controls_package.yaml
+#
+# This package assumes the Modbus hub name is exactly:
+#   ModbusTCPHub-Pool
+
+input_number:
+  idegis_target_ph:
+    name: Idegis Target PH
+    min: 7.00
+    max: 7.80
+    step: 0.01
+    mode: box
+    unit_of_measurement: "pH"
+    icon: mdi:ph
+
+  idegis_target_orp:
+    name: Idegis Target ORP
+    min: 600
+    max: 850
+    step: 1
+    mode: box
+    unit_of_measurement: "mV"
+    icon: mdi:gauge
+
+  idegis_target_chlorine:
+    name: Idegis Target Chlorine
+    min: 0.30
+    max: 3.50
+    step: 0.01
+    mode: box
+    unit_of_measurement: "ppm"
+    icon: mdi:flask-outline
+
+  idegis_target_production:
+    name: Idegis Target Production
+    min: 0
+    max: 100
+    step: 1
+    mode: slider
+    unit_of_measurement: "%"
+    icon: mdi:water-percent
+
+script:
+  idegis_sync_target_ph_from_modbus:
+    alias: Idegis Sync Target PH From Modbus
+    mode: restart
+    sequence:
+      - variables:
+          value: "{{ states('sensor.target_ph') | float(0) }}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.idegis_target_ph
+        data:
+          value: "{{ value }}"
+
+  idegis_sync_target_orp_from_modbus:
+    alias: Idegis Sync Target ORP From Modbus
+    mode: restart
+    sequence:
+      - variables:
+          value: "{{ states('sensor.target_orp') | float(0) }}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.idegis_target_orp
+        data:
+          value: "{{ value }}"
+
+  idegis_sync_target_chlorine_from_modbus:
+    alias: Idegis Sync Target Chlorine From Modbus
+    mode: restart
+    sequence:
+      - variables:
+          value: "{{ states('sensor.target_free_chlorine') | float(0) }}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.idegis_target_chlorine
+        data:
+          value: "{{ value }}"
+
+  idegis_sync_target_production_from_modbus:
+    alias: Idegis Sync Target Production From Modbus
+    mode: restart
+    sequence:
+      - variables:
+          value: "{{ states('sensor.target_electrolysis_production') | float(0) }}"
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.idegis_target_production
+        data:
+          value: "{{ value }}"
+
+  idegis_write_target_ph:
+    alias: Idegis Write Target PH
+    mode: restart
+    sequence:
+      - variables:
+          ph_value: "{{ states('input_number.idegis_target_ph') | float(7.20) }}"
+          register_value: "{{ (ph_value * 100) | round(0) | int }}"
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x57
+          value: "{{ register_value }}"
+      - delay:
+          seconds: 1
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.target_ph
+
+  idegis_write_target_orp:
+    alias: Idegis Write Target ORP
+    mode: restart
+    sequence:
+      - variables:
+          register_value: "{{ states('input_number.idegis_target_orp') | round(0) | int }}"
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x87
+          value: "{{ register_value }}"
+      - delay:
+          seconds: 1
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.target_orp
+
+  idegis_write_target_chlorine:
+    alias: Idegis Write Target Chlorine
+    mode: restart
+    sequence:
+      - variables:
+          cl_value: "{{ states('input_number.idegis_target_chlorine') | float(1.50) }}"
+          register_value: "{{ (cl_value * 100) | round(0) | int }}"
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x88
+          value: "{{ register_value }}"
+      - delay:
+          seconds: 1
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.target_free_chlorine
+
+  idegis_write_target_production:
+    alias: Idegis Write Target Production
+    mode: restart
+    sequence:
+      - variables:
+          register_value: "{{ states('input_number.idegis_target_production') | round(0) | int }}"
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x41
+          value: "{{ register_value }}"
+      - delay:
+          seconds: 1
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.target_electrolysis_production
+
+automation:
+  - id: idegis_seed_target_controls_on_start
+    alias: Idegis Seed Target Controls On Start
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - action: script.idegis_sync_target_ph_from_modbus
+      - action: script.idegis_sync_target_orp_from_modbus
+      - action: script.idegis_sync_target_chlorine_from_modbus
+      - action: script.idegis_sync_target_production_from_modbus
+
+  - id: idegis_seed_target_controls_on_sensor_change
+    alias: Idegis Seed Target Controls On Sensor Change
+    trigger:
+      - platform: state
+        entity_id:
+          - sensor.target_ph
+          - sensor.target_orp
+          - sensor.target_free_chlorine
+          - sensor.target_electrolysis_production
+    action:
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.entity_id == 'sensor.target_ph' }}"
+            sequence:
+              - action: script.idegis_sync_target_ph_from_modbus
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.entity_id == 'sensor.target_orp' }}"
+            sequence:
+              - action: script.idegis_sync_target_orp_from_modbus
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.entity_id == 'sensor.target_free_chlorine' }}"
+            sequence:
+              - action: script.idegis_sync_target_chlorine_from_modbus
+          - conditions:
+              - condition: template
+                value_template: "{{ trigger.entity_id == 'sensor.target_electrolysis_production' }}"
+            sequence:
+              - action: script.idegis_sync_target_production_from_modbus
+
+  - id: idegis_write_target_ph_on_input_change
+    alias: Idegis Write Target PH On Input Change
+    trigger:
+      - platform: state
+        entity_id: input_number.idegis_target_ph
+    condition:
+      - condition: template
+        value_template: >
+          {{ trigger.to_state is not none and trigger.from_state is not none and
+             (trigger.to_state.state | float(0)) != (states('sensor.target_ph') | float(0)) }}
+    action:
+      - action: script.idegis_write_target_ph
+
+  - id: idegis_write_target_orp_on_input_change
+    alias: Idegis Write Target ORP On Input Change
+    trigger:
+      - platform: state
+        entity_id: input_number.idegis_target_orp
+    condition:
+      - condition: template
+        value_template: >
+          {{ trigger.to_state is not none and trigger.from_state is not none and
+             (trigger.to_state.state | float(0)) != (states('sensor.target_orp') | float(0)) }}
+    action:
+      - action: script.idegis_write_target_orp
+
+  - id: idegis_write_target_chlorine_on_input_change
+    alias: Idegis Write Target Chlorine On Input Change
+    trigger:
+      - platform: state
+        entity_id: input_number.idegis_target_chlorine
+    condition:
+      - condition: template
+        value_template: >
+          {{ trigger.to_state is not none and trigger.from_state is not none and
+             (trigger.to_state.state | float(0)) != (states('sensor.target_free_chlorine') | float(0)) }}
+    action:
+      - action: script.idegis_write_target_chlorine
+
+  - id: idegis_write_target_production_on_input_change
+    alias: Idegis Write Target Production On Input Change
+    trigger:
+      - platform: state
+        entity_id: input_number.idegis_target_production
+    condition:
+      - condition: template
+        value_template: >
+          {{ trigger.to_state is not none and trigger.from_state is not none and
+             (trigger.to_state.state | float(0)) != (states('sensor.target_electrolysis_production') | float(0)) }}
+    action:
+      - action: script.idegis_write_target_production

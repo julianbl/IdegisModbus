@@ -1,0 +1,11 @@
+{
+  "name": "Idegis Modbus",
+  "content_in_root": false,
+  "country": ["ES"],
+  "domains": ["idegis_modbus"],
+  "filename": "custom_components/idegis_modbus/manifest.json",
+  "homeassistant": "2025.1.0",
+  "iot_class": "local_polling",
+  "render_readme": true
+}
+

@@ -1,0 +1,464 @@
+# Home Assistant include file for:
+#   modbus: !include idegis_pool_modbus.yaml
+#
+# This file recreates the most relevant entities exposed by the Poolstation
+# cloud integration, using local Modbus RTU over TCP for an Idegis Domotic 2 LS.
+#
+# Notes:
+# - Switches are natively writable through Modbus.
+# - Setpoints are exposed here as readable Modbus sensors, because the native
+#   Home Assistant Modbus integration does not provide Number entities.
+# - Several extra diagnostic sensors are also included because they are
+#   documented in the Idegis Modbus tables.
+
+- name: "ModbusTCPHub-Pool"
+  type: rtuovertcp
+  host: 192.168.2.124
+  port: 4196
+  delay: 2
+  message_wait_milliseconds: 100
+  timeout: 2
+
+  switches:
+    - name: Pool Pump
+      unique_id: relay_pump
+      slave: 1
+      address: 272
+      write_type: holding
+      command_on: 16384
+      command_off: 0
+      verify:
+        address: 272
+        input_type: holding
+        state_on: 16384
+        state_off: 0
+        delay: 0
+
+    - name: Relay Square
+      unique_id: Relay_square
+      slave: 1
+      address: 280
+      write_type: holding
+      command_on: 16384
+      command_off: 0
+      verify:
+        address: 280
+        input_type: holding
+        state_on: 16384
+        state_off: 0
+        delay: 0
+
+    - name: Relay Triangle
+      unique_id: relay_triangle
+      slave: 1
+      address: 288
+      write_type: holding
+      command_on: 16384
+      command_off: 0
+      verify:
+        address: 288
+        input_type: holding
+        state_on: 16384
+        state_off: 0
+        delay: 0
+
+    - name: Pool Led light
+      unique_id: relay_circle
+      slave: 1
+      address: 296
+      write_type: holding
+      command_on: 16384
+      command_off: 0
+      verify:
+        address: 296
+        input_type: holding
+        state_on: 16384
+        state_off: 0
+        delay: 0
+
+  binary_sensors:
+    - name: Electrolisys ON
+      unique_id: electrolisys_on
+      slave: 1
+      input_type: input
+      address: 0x40
+      scan_interval: 15
+
+    - name: Water Flow Problem
+      unique_id: idegis_water_flow_problem
+      slave: 1
+      input_type: input
+      address: 0x24
+      device_class: problem
+      scan_interval: 15
+
+    - name: Digital Input 1
+      unique_id: idegis_digital_input_1
+      slave: 1
+      input_type: input
+      address: 0x100
+      scan_interval: 30
+
+    - name: Digital Input 2
+      unique_id: idegis_digital_input_2
+      slave: 1
+      input_type: input
+      address: 0x101
+      scan_interval: 30
+
+    - name: Digital Input 3
+      unique_id: idegis_digital_input_3
+      slave: 1
+      input_type: input
+      address: 0x102
+      scan_interval: 30
+
+    - name: Digital Input 4
+      unique_id: idegis_digital_input_4
+      slave: 1
+      input_type: input
+      address: 0x103
+      scan_interval: 30
+
+    - name: UV Available
+      unique_id: idegis_uv_available
+      slave: 1
+      input_type: holding
+      address: 0x066
+      scan_interval: 60
+
+    - name: UV Enabled
+      unique_id: idegis_uv_enabled
+      slave: 1
+      input_type: holding
+      address: 0x0D6
+      scan_interval: 60
+
+    - name: UV Light
+      unique_id: idegis_uv_light
+      slave: 1
+      input_type: input
+      address: 0xD4
+      scan_interval: 30
+
+    - name: UV Ballast Problem
+      unique_id: idegis_uv_ballast_problem
+      slave: 1
+      input_type: input
+      address: 0x2A
+      device_class: problem
+      scan_interval: 60
+
+    - name: UV Fuse Problem
+      unique_id: idegis_uv_fuse_problem
+      slave: 1
+      input_type: input
+      address: 0x2B
+      device_class: problem
+      scan_interval: 60
+
+    - name: Pool Pump State
+      unique_id: idegis_pool_pump_state
+      slave: 1
+      input_type: input
+      address: 0x110
+      scan_interval: 30
+
+    - name: Relay Square State
+      unique_id: idegis_relay_square_state
+      slave: 1
+      input_type: input
+      address: 0x112
+      scan_interval: 30
+
+    - name: Relay Triangle State
+      unique_id: idegis_relay_triangle_state
+      slave: 1
+      input_type: input
+      address: 0x114
+      scan_interval: 30
+
+    - name: Pool Led Light State
+      unique_id: idegis_pool_led_light_state
+      slave: 1
+      input_type: input
+      address: 0x116
+      scan_interval: 30
+
+  sensors:
+    - name: Water Temperature
+      unique_id: idegis_water_temperature
+      slave: 1
+      input_type: input
+      address: 0xB1
+      data_type: uint16
+      scale: 0.1
+      precision: 1
+      unit_of_measurement: "°C"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Salt Concentration
+      unique_id: idegis_salt_concentration
+      slave: 1
+      input_type: input
+      address: 0xC1
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "g/L"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Current PH
+      unique_id: idegis_current_ph
+      slave: 1
+      input_type: input
+      address: 0x51
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Target PH
+      unique_id: idegis_target_ph
+      slave: 1
+      input_type: holding
+      address: 0x57
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      state_class: measurement
+      scan_interval: 60
+
+    - name: Current ORP
+      unique_id: idegis_current_orp
+      slave: 1
+      input_type: input
+      address: 0x81
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "mV"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Target ORP
+      unique_id: idegis_target_orp
+      slave: 1
+      input_type: holding
+      address: 0x87
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "mV"
+      state_class: measurement
+      scan_interval: 60
+
+    - name: Current Free Chlorine
+      unique_id: idegis_current_free_chlorine
+      slave: 1
+      input_type: input
+      address: 0x83
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "ppm"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Target Free Chlorine
+      unique_id: idegis_target_free_chlorine
+      slave: 1
+      input_type: holding
+      address: 0x88
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "ppm"
+      state_class: measurement
+      scan_interval: 60
+
+    - name: Electrolysis Production
+      unique_id: idegis_electrolysis_production
+      slave: 1
+      input_type: input
+      address: 0x42
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "%"
+      state_class: measurement
+      scan_interval: 15
+
+    - name: Target Electrolysis Production
+      unique_id: idegis_target_electrolysis_production
+      slave: 1
+      input_type: holding
+      address: 0x41
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "%"
+      state_class: measurement
+      scan_interval: 60
+
+    - name: Cell Current
+      unique_id: idegis_cell_current
+      slave: 1
+      input_type: input
+      address: 0x43
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "A"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Cell Voltage
+      unique_id: idegis_cell_voltage
+      slave: 1
+      input_type: input
+      address: 0x44
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "V"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Instant Chlorine Production
+      unique_id: idegis_instant_chlorine_production
+      slave: 1
+      input_type: input
+      address: 0x45
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "g/h"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: Chlorine Produced Today
+      unique_id: idegis_chlorine_produced_today
+      slave: 1
+      input_type: input
+      address: 0x46
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "g"
+      state_class: total_increasing
+      scan_interval: 60
+
+    - name: Electrolysis Time Today
+      unique_id: idegis_electrolysis_time_today
+      slave: 1
+      input_type: input
+      address: 0x47
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "min"
+      state_class: total_increasing
+      scan_interval: 60
+
+    - name: Total Electrolysis Hours
+      unique_id: idegis_total_electrolysis_hours
+      slave: 1
+      input_type: input
+      address: 0x48
+      data_type: uint32
+      swap: word
+      precision: 0
+      unit_of_measurement: "h"
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: Partial Electrolysis Hours
+      unique_id: idegis_partial_electrolysis_hours
+      slave: 1
+      input_type: input
+      address: 0x4A
+      data_type: uint32
+      swap: word
+      precision: 0
+      unit_of_measurement: "h"
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: PH Pump Percentage
+      unique_id: idegis_ph_pump_percentage
+      slave: 1
+      input_type: input
+      address: 0x58
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "%"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: CL Pump Percentage
+      unique_id: idegis_cl_pump_percentage
+      slave: 1
+      input_type: input
+      address: 0x88
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "%"
+      state_class: measurement
+      scan_interval: 30
+
+    - name: UV Total Lamp Hours
+      unique_id: idegis_uv_total_lamp_hours
+      slave: 1
+      input_type: input
+      address: 0xD6
+      data_type: uint32
+      swap: word
+      precision: 0
+      unit_of_measurement: "h"
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: UV Current Lamp Hours
+      unique_id: idegis_uv_current_lamp_hours
+      slave: 1
+      input_type: input
+      address: 0xD9
+      data_type: uint32
+      swap: word
+      precision: 0
+      unit_of_measurement: "h"
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: UV Total Ignitions
+      unique_id: idegis_uv_total_ignitions
+      slave: 1
+      input_type: input
+      address: 0xD5
+      data_type: uint16
+      precision: 0
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: UV Lamp Partial Ignitions
+      unique_id: idegis_uv_lamp_partial_ignitions
+      slave: 1
+      input_type: input
+      address: 0xD8
+      data_type: uint16
+      precision: 0
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: Sunrise
+      unique_id: idegis_sunrise
+      slave: 1
+      input_type: input
+      address: 0xF0
+      data_type: uint16
+      scan_interval: 300
+
+    - name: Sunset
+      unique_id: idegis_sunset
+      slave: 1
+      input_type: input
+      address: 0xF1
+      data_type: uint16
+      scan_interval: 300

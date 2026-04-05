@@ -1,0 +1,58 @@
+{
+  "title": "Idegis Modbus",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to Idegis Modbus bridge",
+        "description": "Enter the TCP bridge details for your Idegis pool controller.",
+        "data": {
+          "name": "Name",
+          "host": "Host",
+          "port": "Port",
+          "slave": "Modbus slave",
+          "timeout": "Timeout (seconds)",
+          "message_wait_ms": "Delay between Modbus requests (ms)"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure Idegis Modbus",
+        "data": {
+          "name": "Name",
+          "host": "Host",
+          "port": "Port",
+          "slave": "Modbus slave",
+          "timeout": "Timeout (seconds)",
+          "message_wait_ms": "Delay between Modbus requests (ms)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the Modbus bridge.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This controller is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Idegis Modbus options",
+        "data": {
+          "scan_interval": "Polling interval (seconds)",
+          "enable_uv": "Create UV entities",
+          "enable_inputs": "Create digital input entities",
+          "enable_diagnostics": "Create diagnostic entities",
+          "enable_buttons": "Create maintenance buttons"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_refresh": {
+      "name": "Force refresh",
+      "description": "Refresh all Idegis Modbus entries immediately."
+    }
+  }
+}
+

@@ -1,0 +1,58 @@
+{
+  "title": "Idegis Modbus",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Conectar con el bridge Modbus de Idegis",
+        "description": "Introduce los datos del bridge TCP de tu controlador de piscina Idegis.",
+        "data": {
+          "name": "Nombre",
+          "host": "Host",
+          "port": "Puerto",
+          "slave": "Esclavo Modbus",
+          "timeout": "Timeout (segundos)",
+          "message_wait_ms": "Espera entre peticiones Modbus (ms)"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigurar Idegis Modbus",
+        "data": {
+          "name": "Nombre",
+          "host": "Host",
+          "port": "Puerto",
+          "slave": "Esclavo Modbus",
+          "timeout": "Timeout (segundos)",
+          "message_wait_ms": "Espera entre peticiones Modbus (ms)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "No se ha podido conectar con el bridge Modbus.",
+      "unknown": "Error inesperado."
+    },
+    "abort": {
+      "already_configured": "Este controlador ya está configurado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de Idegis Modbus",
+        "data": {
+          "scan_interval": "Intervalo de lectura (segundos)",
+          "enable_uv": "Crear entidades UV",
+          "enable_inputs": "Crear entidades de entradas digitales",
+          "enable_diagnostics": "Crear entidades de diagnóstico",
+          "enable_buttons": "Crear botones de mantenimiento"
+        }
+      }
+    }
+  },
+  "services": {
+    "force_refresh": {
+      "name": "Forzar actualización",
+      "description": "Actualiza inmediatamente todas las entradas de Idegis Modbus."
+    }
+  }
+}
+
