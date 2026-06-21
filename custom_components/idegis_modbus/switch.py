@@ -20,18 +20,32 @@ class IdegisSwitch(IdegisEntity, SwitchEntity):
         coordinator = entry.runtime_data
         super().__init__(coordinator, entry, description.key, description.name)
         self.description = description
+        self._attr_icon = description.icon
+        self._attr_entity_category = description.entity_category
 
     @property
     def is_on(self) -> bool | None:
-        """Return the relay state."""
+        """Return the switch state."""
+        if self.description.value_fn is not None:
+            return self.description.value_fn(self.coordinator)
         return self.coordinator.get_relay_state(self.description.key)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        """Turn on the relay."""
+        """Turn on the switch."""
+        if self.description.write_address is not None and self.description.bit is not None:
+            await self.coordinator.async_set_holding_bit(
+                self.description.write_address, self.description.bit, True
+            )
+            return
         await self.coordinator.async_set_relay(self.description.key, True)
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        """Turn off the relay."""
+        """Turn off the switch."""
+        if self.description.write_address is not None and self.description.bit is not None:
+            await self.coordinator.async_set_holding_bit(
+                self.description.write_address, self.description.bit, False
+            )
+            return
         await self.coordinator.async_set_relay(self.description.key, False)
 
 
@@ -42,4 +56,3 @@ async def async_setup_entry(
 ) -> None:
     """Set up Idegis switches."""
     async_add_entities([IdegisSwitch(entry, description) for description in SWITCH_DESCRIPTIONS])
-

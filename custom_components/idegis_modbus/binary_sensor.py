@@ -21,6 +21,7 @@ class IdegisBinarySensor(IdegisEntity, BinarySensorEntity):
         coordinator = entry.runtime_data
         super().__init__(coordinator, entry, description.key, description.name)
         self.entity_description = description
+        self._attr_icon = description.icon
         self._attr_device_class = description.device_class
         self._attr_entity_category = description.entity_category
         self._attr_entity_registry_enabled_default = description.enabled_default
@@ -53,4 +54,3 @@ async def async_setup_entry(
         if _is_enabled(entry, description)
     ]
     async_add_entities(entities)
-

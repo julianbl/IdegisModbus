@@ -122,6 +122,11 @@ class IdegisModbusCoordinator(DataUpdateCoordinator[IdegisData]):
         await self.client.async_write_register(address, value)
         await self.async_request_refresh()
 
+    async def async_set_holding_bit(self, address: int, bit: int, is_on: bool) -> None:
+        """Write one bit in a holding register and refresh."""
+        await self.client.async_write_register_bit(address, bit, is_on)
+        await self.async_request_refresh()
+
     async def async_press_button(self, address: int, bit: int) -> None:
         """Press a pulse-style maintenance action."""
         await self.client.async_write_register_bit_pulse(address, bit)

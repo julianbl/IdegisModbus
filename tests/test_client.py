@@ -31,3 +31,24 @@ async def test_async_write_relay_state_forces_manual_mode_off_bit15() -> None:
     await client.async_write_relay_state(0x110, False)
     client.async_write_register.assert_awaited_once_with(0x110, 0)
 
+
+@pytest.mark.asyncio
+async def test_async_write_register_bit_preserves_unrelated_bits() -> None:
+    """Writing a control-word bit should preserve every other bit."""
+    client = IdegisModbusClient("127.0.0.1", 4196, 1, 2, 100)
+    client.async_read_holding_registers = AsyncMock(return_value=[0b0000_0000_0000_0101])
+    client.async_write_register = AsyncMock()
+
+    await client.async_write_register_bit(0x56, 6, True)
+    client.async_write_register.assert_awaited_once_with(0x56, 0b0000_0000_0100_0101)
+
+
+@pytest.mark.asyncio
+async def test_async_write_register_bit_can_clear_bit() -> None:
+    """Clearing a control-word bit should preserve every other bit."""
+    client = IdegisModbusClient("127.0.0.1", 4196, 1, 2, 100)
+    client.async_read_holding_registers = AsyncMock(return_value=[0b0000_0000_0100_0101])
+    client.async_write_register = AsyncMock()
+
+    await client.async_write_register_bit(0x56, 6, False)
+    client.async_write_register.assert_awaited_once_with(0x56, 0b0000_0000_0000_0101)

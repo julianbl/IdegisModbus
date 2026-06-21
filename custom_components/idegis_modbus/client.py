@@ -119,6 +119,20 @@ class IdegisModbusClient:
         await asyncio.sleep(pulse_ms / 1000)
         await self.async_write_register(address, released)
 
+    async def async_write_register_bit(
+        self,
+        address: int,
+        bit: int,
+        is_on: bool,
+    ) -> None:
+        """Set or clear a bit in a holding register, preserving the rest."""
+        current = (await self.async_read_holding_registers(address, 1))[0]
+        if is_on:
+            next_value = current | (1 << bit)
+        else:
+            next_value = current & ~(1 << bit)
+        await self.async_write_register(address, next_value)
+
     async def async_write_relay_state(self, address: int, is_on: bool) -> None:
         """Put an output relay into manual mode and set bit 14 on/off."""
         current = (await self.async_read_holding_registers(address, 1))[0]
@@ -130,4 +144,3 @@ class IdegisModbusClient:
             "Writing relay state at 0x%X: current=%s next=%s", address, current, next_value
         )
         await self.async_write_register(address, next_value)
-

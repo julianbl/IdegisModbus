@@ -35,6 +35,7 @@ class BinarySensorDescription:
     key: str
     name: str
     value_fn: BoolValueFn
+    icon: str | None = None
     device_class: BinarySensorDeviceClass | None = None
     entity_category: EntityCategory | None = None
     enabled_default: bool = True
@@ -59,6 +60,12 @@ class NumberDescription:
 class SwitchDescription:
     key: str
     name: str
+    value_fn: BoolValueFn | None = None
+    write_address: int | None = None
+    bit: int | None = None
+    icon: str | None = None
+    entity_category: EntityCategory | None = None
+    feature_group: str = "core"
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,6 +100,24 @@ SWITCH_DESCRIPTIONS = (
     SwitchDescription("relay_square", "Relay Square"),
     SwitchDescription("relay_triangle", "Relay Triangle"),
     SwitchDescription("pool_led_light", "Pool Led Light"),
+    SwitchDescription(
+        "ph_intelligent_dosing",
+        "PH Intelligent Dosing",
+        lambda coordinator: coordinator.get_holding_bit(0x56, 6),
+        write_address=0x56,
+        bit=6,
+        icon="mdi:brain",
+        entity_category=EntityCategory.CONFIG,
+    ),
+    SwitchDescription(
+        "ph_tank_detection",
+        "PH Tank Detection",
+        lambda coordinator: coordinator.get_holding_bit(0x56, 7),
+        write_address=0x56,
+        bit=7,
+        icon="mdi:bottle-tonic-plus-outline",
+        entity_category=EntityCategory.CONFIG,
+    ),
 )
 
 SENSOR_DESCRIPTIONS = (
@@ -247,6 +272,24 @@ SENSOR_DESCRIPTIONS = (
         feature_group="diagnostic",
     ),
     SensorDescription(
+        "ph_pump_total_hours",
+        "PH Pump Total Hours",
+        lambda coordinator: coordinator.get_input(0x5A),
+        native_unit_of_measurement="h",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        feature_group="diagnostic",
+    ),
+    SensorDescription(
+        "ph_pump_partial_hours",
+        "PH Pump Partial Hours",
+        lambda coordinator: coordinator.get_input(0x5B),
+        native_unit_of_measurement="h",
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        feature_group="diagnostic",
+    ),
+    SensorDescription(
         "cl_pump_percentage",
         "CL Pump Percentage",
         lambda coordinator: coordinator.get_input(0x88),
@@ -318,6 +361,30 @@ BINARY_SENSOR_DESCRIPTIONS = (
         "Water Flow Problem",
         lambda coordinator: coordinator.get_input_bit(0x24, 0),
         device_class=BinarySensorDeviceClass.PROBLEM,
+    ),
+    BinarySensorDescription(
+        "ph_tank_alarm",
+        "PH Tank Alarm",
+        lambda coordinator: coordinator.get_input_bit(0x26, 5),
+        device_class=BinarySensorDeviceClass.PROBLEM,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        feature_group="diagnostic",
+    ),
+    BinarySensorDescription(
+        "ph_tank_input",
+        "PH Tank Input",
+        lambda coordinator: coordinator.get_input_bit(0x56, 2),
+        icon="mdi:bottle-tonic",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        feature_group="diagnostic",
+    ),
+    BinarySensorDescription(
+        "ph_tank_detection_enabled",
+        "PH Tank Detection Enabled",
+        lambda coordinator: coordinator.get_holding_bit(0x56, 7),
+        icon="mdi:bottle-tonic-plus-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        feature_group="diagnostic",
     ),
     BinarySensorDescription(
         "digital_input_1",
@@ -468,6 +535,20 @@ BUTTON_DESCRIPTIONS = (
         write_address=0x56,
         bit=13,
         icon="mdi:pump-off",
+    ),
+    ButtonDescription(
+        "reset_ph_tank_alarm",
+        "Reset PH Tank Alarm",
+        write_address=0x26,
+        bit=5,
+        icon="mdi:bottle-tonic-outline",
+    ),
+    ButtonDescription(
+        "reset_ph_pump_partial_hours",
+        "Reset PH Pump Partial Hours",
+        write_address=0x56,
+        bit=15,
+        icon="mdi:pump",
     ),
     ButtonDescription(
         "reset_cl_pumpstop",

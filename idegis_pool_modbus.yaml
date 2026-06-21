@@ -186,6 +186,16 @@
       scan_interval: 30
 
   sensors:
+    - name: PH Alarm Word
+      unique_id: idegis_ph_alarm_word
+      # Raw input alarm word. Bit 5 is tank_level_alarm_ph_output_1.
+      slave: 1
+      input_type: input
+      address: 0x26
+      data_type: uint16
+      precision: 0
+      scan_interval: 30
+
     - name: Water Temperature
       unique_id: idegis_water_temperature
       slave: 1
@@ -230,6 +240,28 @@
       scale: 0.01
       precision: 2
       state_class: measurement
+      scan_interval: 60
+
+    - name: PH Status Word
+      unique_id: idegis_ph_status_word
+      # Raw input status word. Bit 2 is the pH tank/garrafa input.
+      slave: 1
+      input_type: input
+      address: 0x56
+      data_type: uint16
+      precision: 0
+      scan_interval: 30
+
+    - name: PH Control Word
+      unique_id: idegis_ph_control_word
+      # Raw diagnostic value. Bit 6 is enable_intelligent_dosing_ph;
+      # bit 7 is enable_ph_tank_detection.
+      # The controls package exposes safe template switches that preserve the other bits.
+      slave: 1
+      input_type: holding
+      address: 0x56
+      data_type: uint16
+      precision: 0
       scan_interval: 60
 
     - name: Current ORP
@@ -391,6 +423,28 @@
       unit_of_measurement: "%"
       state_class: measurement
       scan_interval: 30
+
+    - name: PH Pump Total Hours
+      unique_id: idegis_ph_pump_total_hours
+      slave: 1
+      input_type: input
+      address: 0x5A
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "h"
+      state_class: total_increasing
+      scan_interval: 120
+
+    - name: PH Pump Partial Hours
+      unique_id: idegis_ph_pump_partial_hours
+      slave: 1
+      input_type: input
+      address: 0x5B
+      data_type: uint16
+      precision: 0
+      unit_of_measurement: "h"
+      state_class: total_increasing
+      scan_interval: 120
 
     - name: CL Pump Percentage
       unique_id: idegis_cl_pump_percentage

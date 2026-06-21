@@ -49,6 +49,7 @@ class RegisterBlock:
 
 INPUT_BLOCKS: Final = (
     RegisterBlock(0x24, 1),
+    RegisterBlock(0x26, 1),
     RegisterBlock(0x2A, 1),
     RegisterBlock(0x40, 14),
     RegisterBlock(0x51, 1),
@@ -67,6 +68,7 @@ HOLDING_BLOCKS: Final = (
     RegisterBlock(0x06, 1),
     RegisterBlock(0x0D, 1),
     RegisterBlock(0x41, 2),
+    RegisterBlock(0x56, 1),
     RegisterBlock(0x57, 1),
     RegisterBlock(0x87, 2),
     RegisterBlock(0xD6, 1),

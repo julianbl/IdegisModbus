@@ -47,13 +47,171 @@ input_number:
     unit_of_measurement: "%"
     icon: mdi:water-percent
 
+input_button:
+  idegis_reset_ph_tank_alarm:
+    name: Idegis Reset PH Tank Alarm
+    icon: mdi:bottle-tonic-outline
+
+  idegis_reset_ph_pump_partial_hours:
+    name: Idegis Reset PH Pump Partial Hours
+    icon: mdi:pump
+
+template:
+  - binary_sensor:
+      - name: Idegis PH Intelligent Dosing Readback
+        unique_id: idegis_ph_intelligent_dosing_readback
+        icon: mdi:brain
+        state: "{{ (states('sensor.ph_control_word') | int(0)) | bitwise_and(64) > 0 }}"
+
+      - name: Idegis PH Tank Alarm
+        unique_id: idegis_ph_tank_alarm
+        icon: mdi:bottle-tonic-outline
+        device_class: problem
+        state: "{{ (states('sensor.ph_alarm_word') | int(0)) | bitwise_and(32) > 0 }}"
+
+      - name: Idegis PH Tank Input
+        unique_id: idegis_ph_tank_input
+        icon: mdi:bottle-tonic
+        state: "{{ (states('sensor.ph_status_word') | int(0)) | bitwise_and(4) > 0 }}"
+
+      - name: Idegis PH Tank Detection Enabled
+        unique_id: idegis_ph_tank_detection_enabled
+        icon: mdi:bottle-tonic-plus-outline
+        state: "{{ (states('sensor.ph_control_word') | int(0)) | bitwise_and(128) > 0 }}"
+
+  - switch:
+      - name: Idegis PH Intelligent Dosing
+        unique_id: idegis_ph_intelligent_dosing
+        icon: mdi:brain
+        state: "{{ (states('sensor.ph_control_word') | int(0)) | bitwise_and(64) > 0 }}"
+        turn_on:
+          - variables:
+              current_value: "{{ states('sensor.ph_control_word') | int(0) }}"
+              register_value: "{{ current_value | bitwise_or(64) }}"
+          - action: modbus.write_register
+            data:
+              hub: ModbusTCPHub-Pool
+              slave: 1
+              address: 0x56
+              value: "{{ register_value }}"
+          - delay:
+              seconds: 1
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.ph_control_word
+        turn_off:
+          - variables:
+              current_value: "{{ states('sensor.ph_control_word') | int(0) }}"
+              register_value: "{{ current_value | bitwise_and(65471) }}"
+          - action: modbus.write_register
+            data:
+              hub: ModbusTCPHub-Pool
+              slave: 1
+              address: 0x56
+              value: "{{ register_value }}"
+          - delay:
+              seconds: 1
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.ph_control_word
+
+      - name: Idegis PH Tank Detection
+        unique_id: idegis_ph_tank_detection
+        icon: mdi:bottle-tonic-plus-outline
+        state: "{{ (states('sensor.ph_control_word') | int(0)) | bitwise_and(128) > 0 }}"
+        turn_on:
+          - variables:
+              current_value: "{{ states('sensor.ph_control_word') | int(0) }}"
+              register_value: "{{ current_value | bitwise_or(128) }}"
+          - action: modbus.write_register
+            data:
+              hub: ModbusTCPHub-Pool
+              slave: 1
+              address: 0x56
+              value: "{{ register_value }}"
+          - delay:
+              seconds: 1
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.ph_control_word
+        turn_off:
+          - variables:
+              current_value: "{{ states('sensor.ph_control_word') | int(0) }}"
+              register_value: "{{ current_value | bitwise_and(65407) }}"
+          - action: modbus.write_register
+            data:
+              hub: ModbusTCPHub-Pool
+              slave: 1
+              address: 0x56
+              value: "{{ register_value }}"
+          - delay:
+              seconds: 1
+          - action: homeassistant.update_entity
+            target:
+              entity_id: sensor.ph_control_word
+
 script:
+  idegis_reset_ph_tank_alarm:
+    alias: Idegis Reset PH Tank Alarm
+    mode: restart
+    sequence:
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x26
+          value: 32
+      - delay:
+          milliseconds: 200
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x26
+          value: 0
+      - delay:
+          seconds: 1
+      - action: homeassistant.update_entity
+        target:
+          entity_id: sensor.ph_alarm_word
+
+  idegis_reset_ph_pump_partial_hours:
+    alias: Idegis Reset PH Pump Partial Hours
+    mode: restart
+    sequence:
+      - variables:
+          current_value: "{{ states('sensor.ph_control_word') | int(0) }}"
+          register_value: "{{ current_value | bitwise_or(32768) }}"
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x56
+          value: "{{ register_value }}"
+      - delay:
+          milliseconds: 200
+      - action: modbus.write_register
+        data:
+          hub: ModbusTCPHub-Pool
+          slave: 1
+          address: 0x56
+          value: "{{ current_value }}"
+      - delay:
+          seconds: 1
+      - action: homeassistant.update_entity
+        target:
+          entity_id:
+            - sensor.ph_control_word
+            - sensor.ph_pump_partial_hours
+
   idegis_sync_target_ph_from_modbus:
     alias: Idegis Sync Target PH From Modbus
     mode: restart
     sequence:
       - variables:
-          value: "{{ states('sensor.target_ph') | float(0) }}"
+          value: "{{ states('sensor.target_ph') | float(none) }}"
+      - condition: template
+        value_template: "{{ value is not none and 7.00 <= value <= 7.80 }}"
       - action: input_number.set_value
         target:
           entity_id: input_number.idegis_target_ph
@@ -65,7 +223,9 @@ script:
     mode: restart
     sequence:
       - variables:
-          value: "{{ states('sensor.target_orp') | float(0) }}"
+          value: "{{ states('sensor.target_orp') | float(none) }}"
+      - condition: template
+        value_template: "{{ value is not none and 600 <= value <= 850 }}"
       - action: input_number.set_value
         target:
           entity_id: input_number.idegis_target_orp
@@ -77,7 +237,9 @@ script:
     mode: restart
     sequence:
       - variables:
-          value: "{{ states('sensor.target_free_chlorine') | float(0) }}"
+          value: "{{ states('sensor.target_free_chlorine') | float(none) }}"
+      - condition: template
+        value_template: "{{ value is not none and 0.30 <= value <= 3.50 }}"
       - action: input_number.set_value
         target:
           entity_id: input_number.idegis_target_chlorine
@@ -89,7 +251,9 @@ script:
     mode: restart
     sequence:
       - variables:
-          value: "{{ states('sensor.target_electrolysis_production') | float(0) }}"
+          value: "{{ states('sensor.target_electrolysis_production') | float(none) }}"
+      - condition: template
+        value_template: "{{ value is not none and 0 <= value <= 100 }}"
       - action: input_number.set_value
         target:
           entity_id: input_number.idegis_target_production
@@ -181,6 +345,22 @@ automation:
       - action: script.idegis_sync_target_orp_from_modbus
       - action: script.idegis_sync_target_chlorine_from_modbus
       - action: script.idegis_sync_target_production_from_modbus
+
+  - id: idegis_reset_ph_tank_alarm_on_button_press
+    alias: Idegis Reset PH Tank Alarm On Button Press
+    trigger:
+      - platform: state
+        entity_id: input_button.idegis_reset_ph_tank_alarm
+    action:
+      - action: script.idegis_reset_ph_tank_alarm
+
+  - id: idegis_reset_ph_pump_partial_hours_on_button_press
+    alias: Idegis Reset PH Pump Partial Hours On Button Press
+    trigger:
+      - platform: state
+        entity_id: input_button.idegis_reset_ph_pump_partial_hours
+    action:
+      - action: script.idegis_reset_ph_pump_partial_hours
 
   - id: idegis_seed_target_controls_on_sensor_change
     alias: Idegis Seed Target Controls On Sensor Change
