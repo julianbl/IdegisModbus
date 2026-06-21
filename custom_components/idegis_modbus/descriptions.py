@@ -334,18 +334,20 @@ SENSOR_DESCRIPTIONS = (
     ),
     SensorDescription(
         "sunrise",
-        "Sunrise",
+        "Sunrise Raw",
         lambda coordinator: coordinator.get_input(0xF0),
         icon="mdi:weather-sunset-up",
         entity_category=EntityCategory.DIAGNOSTIC,
+        enabled_default=False,
         feature_group="diagnostic",
     ),
     SensorDescription(
         "sunset",
-        "Sunset",
+        "Sunset Raw",
         lambda coordinator: coordinator.get_input(0xF1),
         icon="mdi:weather-sunset-down",
         entity_category=EntityCategory.DIAGNOSTIC,
+        enabled_default=False,
         feature_group="diagnostic",
     ),
 )

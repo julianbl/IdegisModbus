@@ -501,18 +501,22 @@
       state_class: total_increasing
       scan_interval: 120
 
-    - name: Sunrise
-      unique_id: idegis_sunrise
-      slave: 1
-      input_type: input
-      address: 0xF0
-      data_type: uint16
-      scan_interval: 300
-
-    - name: Sunset
-      unique_id: idegis_sunset
-      slave: 1
-      input_type: input
-      address: 0xF1
-      data_type: uint16
-      scan_interval: 300
+    # The Idegis table documents 0xF0/0xF1 as HHMM sunrise/sunset values, but
+    # this device returns invalid raw values such as 4358 and 7957. Keep these
+    # disabled unless your firmware is known to return valid HHMM times.
+    #
+    # - name: Sunrise Raw
+    #   unique_id: idegis_sunrise
+    #   slave: 1
+    #   input_type: input
+    #   address: 0xF0
+    #   data_type: uint16
+    #   scan_interval: 300
+    #
+    # - name: Sunset Raw
+    #   unique_id: idegis_sunset
+    #   slave: 1
+    #   input_type: input
+    #   address: 0xF1
+    #   data_type: uint16
+    #   scan_interval: 300
